@@ -1,17 +1,17 @@
 <template>
   <div class="about">
     <img alt="Vue logo" src="../assets/logo.png">
-    <AboutComponents msg="Lantern Of Dusk"/>
+    <AboutPage msg="Lantern Of Dusk"/>
   </div>
 </template>
 
 <script>
-import AboutComponents from '@/components/AboutComponents.vue'
+import AboutPage from '@/components/AboutPage.vue'
 
 export default {
   name: 'AboutView',
   components: {
-    AboutComponents
+    AboutPage
   }
 }
 </script>
