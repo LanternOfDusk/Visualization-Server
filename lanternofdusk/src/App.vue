@@ -1,7 +1,10 @@
 <template>
   <nav>
     <router-link to="/">Home</router-link> |
-    <router-link to="/control">Control Screen</router-link>
+    <router-link to="/monitor">Monitor</router-link> |
+    <router-link to="/navigation">Navigation</router-link> |
+    <router-link to="/device">Device</router-link> |
+    <router-link to="/about">About</router-link>
   </nav>
   <router-view/>
 </template>
@@ -11,6 +14,7 @@ body {
   margin: 0;
   padding: 0;
 }
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -20,6 +24,8 @@ body {
 }
 
 nav {
+  position: absolute;
+  margin: 10px;
   height: 22px;
 }
 

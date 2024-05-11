@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@tweenjs/tween.js": "^23.1.2",
     "core-js": "^3.8.3",
     "install": "^0.13.0",
     "npm": "^10.7.0",

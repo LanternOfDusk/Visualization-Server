@@ -14,9 +14,10 @@ export default {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     const keyStates = {};
+    //const dots = {};
 
     let frameId;
-    
+
     const initThree = () => {
       // scene 설정
       scene.background = new THREE.Color(0xffffff);
@@ -62,8 +63,8 @@ export default {
 
     const onMouseMove = (event) => {
       if (document.pointerLockElement === document.body) {
-        camera.rotation.y -= event.movementX / 500;
-        camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x - event.movementY / 500));
+        camera.rotation.y -= event.movementX / 700;
+        camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x - event.movementY / 700));
       }
     };
 
@@ -79,7 +80,6 @@ export default {
     const render = () => {
       frameId = requestAnimationFrame(render);
       renderer.render(scene, camera);
-
       updateCamera();
     };
 
@@ -123,9 +123,63 @@ export default {
       return cameraDirection;
     }
 
+    // const setDots = () => {
+
+    // }
+
+    // let index = 0;
+    // let up = true;
+    // const fetchData = () => {
+    //   try {
+    //     // 외부 API에서 데이터를 가져옴
+    //     // const response = await fetch('외부 API URL');
+    //     // const data = await response.json();
+
+    //     // 테스트 값
+    //     const data = {
+    //       "x" : 0,
+    //       "y" : 1,
+    //       "z" : 0
+    //     }
+
+    //     // 받아온 데이터를 이용하여 3D 화면에 점 추가
+    //     const geometry = new THREE.SphereGeometry(0.5, 32, 32);
+    //     const material = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true });
+    //     const point = new THREE.Mesh(geometry, material);
+    //     point.position.set(data.x + index, data.y, data.z); // 외부 API에서 받아온 좌표 데이터를 사용하여 점의 위치 설정
+    //     point.material.opacity = 0;
+    //     scene.add(point);
+
+    //     let up = true;
+    //     setInterval(() => {
+    //       if (point.material.opacity == 1) {
+    //         up = false;
+    //       }
+    //       let i = up ? 0.02 : -0.02;
+    //       point.material.opacity +=i;
+    //     }, 10);
+        
+        
+    //     // setTimeout(() => {
+    //     //   point.material.opacity = 1;
+    //     //   setTimeout(() => {
+    //     //     scene.remove(point);
+    //     //   }, 500);
+    //     // }, 500);
+    //   } catch (error) {
+    //     console.error('Error fetching data:', error);
+    //   }
+    //   console.log(index);
+    //   if (index == 10) up = false;
+    //   if (index == 0) up = true;
+
+    //   index = up ? index + 1 : index - 1;
+    // };
+
     onMounted(() => {
       initThree(); // 컴포넌트가 마운트되면 초기화
       render(); // 랜더링 시작
+      //setInterval(fetchData, 1000);
     });
 
     onUnmounted(() => {
