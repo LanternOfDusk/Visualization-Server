@@ -63,7 +63,7 @@ export default {
     const onMouseMove = (event) => {
       if (document.pointerLockElement === document.body) {
         camera.rotation.y -= event.movementX / 500;
-        camera.rotation.x -= event.movementY / 500;
+        camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x - event.movementY / 500));
       }
     };
 
