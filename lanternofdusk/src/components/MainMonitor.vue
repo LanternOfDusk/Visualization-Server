@@ -15,6 +15,7 @@ export default {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     const keyStates = {};
+    const dots = {};
 
     let frameId;
 
@@ -78,9 +79,13 @@ export default {
     };
 
     const render = () => {
-      frameId = requestAnimationFrame(render);
-      renderer.render(scene, camera);
       updateCamera();
+      for (const key in dots) {
+        animateDot(key);
+      }
+
+      renderer.render(scene, camera);
+      frameId = requestAnimationFrame(render);
     };
 
     const updateCamera = () => {
@@ -138,30 +143,34 @@ export default {
       });
       const point = new THREE.Mesh(geometry, material);
       scene.add(point);
-
-      animateDot(point, id);
+      point.animations
+      dots[id] = {
+        point: point,
+        animation: {
+          increase : true
+        }
+      }
     }
 
-    const animateDot = (point, id) => {
-      let increase = true;
-      setInterval(() => {
-        if (point.material.opacity > 1 || point.material.opacity < 0) {
-          increase = !increase;
-        }
-        if (point.material.opacity <= 0) {
-          let data = getData(id);
-          point.position.set(data[0], data[1], data[2]);
-        }
+    const animateDot = (id) => {
+      if (dots[id].point.material.opacity > 1) {
+        dots[id].animation.increase = false;
+      }
+      if (dots[id].point.material.opacity < 0) {
+        dots[id].animation.increase = true;
+      }
+      
+      if (dots[id].point.material.opacity <= 0) {
+        let data = getData(id);
+        dots[id].point.position.set(data[0], data[1], data[2]);
+      }
 
-        if (increase) point.material.opacity += 0.01;
-        else point.material.opacity -= 0.01;
-      }, 10);
+      if (dots[id].animation.increase) dots[id].point.material.opacity += 0.02;
+      else dots[id].point.material.opacity -= 0.02;
     }
 
-    let index = 0;
     function getData(id) {
-      index++;
-      return [0,id + index,0];
+      return [0,id,0];
     }
 
     onMounted(() => {
