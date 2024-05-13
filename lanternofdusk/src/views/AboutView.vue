@@ -1,7 +1,6 @@
 <template>
   <div class="about">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <AboutPage msg="Lantern Of Dusk"/>
+    <AboutPage/>
   </div>
 </template>
 
@@ -15,9 +14,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-img {
-  margin-top: 40px;
-}
-</style>

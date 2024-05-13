@@ -6,7 +6,7 @@
       <li><router-link to="/">Home - 메인 페이지</router-link></li>
       <li><router-link to="/monitor">Monitor - 메인 관제 페이지</router-link></li>
       <li><router-link to="/navigation">Navigation - 단말기 네비게이션 페이지</router-link></li>
-      <li><router-link to="/device">Setting - 단말기 관리 페이지</router-link></li>
+      <li><router-link to="/device">Device - 단말기 관리 페이지</router-link></li>
       <li><router-link to="/about">About - 소개 페이지</router-link></li>
     </ul>
   </div>
@@ -25,7 +25,6 @@ export default {
 <style scoped>
 h1 {
   margin: 0;
-  padding: 40px;
 }
 ul {
   list-style-type: none;

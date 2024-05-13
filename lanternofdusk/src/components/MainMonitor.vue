@@ -15,7 +15,6 @@ export default {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     const keyStates = {};
-    //const dots = {};
 
     let frameId;
 
@@ -124,67 +123,54 @@ export default {
       return cameraDirection;
     }
 
-    // const setDots = () => {
+    const setDots = () => {
+      addDot(2);
+      addDot(5);
+      addDot(7);
+    }
 
-    // }
+    const addDot = (id) => {
+      const geometry = new THREE.SphereGeometry(0.5, 32, 32);
+      const material = new THREE.MeshBasicMaterial({ 
+        color: 0xff0000, 
+        transparent: true,
+        opacity: 0 
+      });
+      const point = new THREE.Mesh(geometry, material);
+      scene.add(point);
 
-    // let index = 0;
-    // let up = true;
-    // const fetchData = () => {
-    //   try {
-    //     // 외부 API에서 데이터를 가져옴
-    //     // const response = await fetch('외부 API URL');
-    //     // const data = await response.json();
+      animateDot(point, id);
+    }
 
-    //     // 테스트 값
-    //     const data = {
-    //       "x" : 0,
-    //       "y" : 1,
-    //       "z" : 0
-    //     }
+    const animateDot = (point, id) => {
+      let increase = true;
+      setInterval(() => {
+        if (point.material.opacity > 1 || point.material.opacity < 0) {
+          increase = !increase;
+        }
+        if (point.material.opacity <= 0) {
+          let data = getData(id);
+          point.position.set(data[0], data[1], data[2]);
+        }
 
-    //     // 받아온 데이터를 이용하여 3D 화면에 점 추가
-    //     const geometry = new THREE.SphereGeometry(0.5, 32, 32);
-    //     const material = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true });
-    //     const point = new THREE.Mesh(geometry, material);
-    //     point.position.set(data.x + index, data.y, data.z); // 외부 API에서 받아온 좌표 데이터를 사용하여 점의 위치 설정
-    //     point.material.opacity = 0;
-    //     scene.add(point);
+        if (increase) point.material.opacity += 0.01;
+        else point.material.opacity -= 0.01;
+      }, 10);
+    }
 
-    //     let up = true;
-    //     setInterval(() => {
-    //       if (point.material.opacity == 1) {
-    //         up = false;
-    //       }
-    //       let i = up ? 0.02 : -0.02;
-    //       point.material.opacity +=i;
-    //     }, 10);
-        
-        
-    //     // setTimeout(() => {
-    //     //   point.material.opacity = 1;
-    //     //   setTimeout(() => {
-    //     //     scene.remove(point);
-    //     //   }, 500);
-    //     // }, 500);
-    //   } catch (error) {
-    //     console.error('Error fetching data:', error);
-    //   }
-    //   console.log(index);
-    //   if (index == 10) up = false;
-    //   if (index == 0) up = true;
-
-    //   index = up ? index + 1 : index - 1;
-    // };
+    let index = 0;
+    function getData(id) {
+      index++;
+      return [0,id + index,0];
+    }
 
     onMounted(() => {
-      initThree(); // 컴포넌트가 마운트되면 초기화
-      render(); // 랜더링 시작
-      //setInterval(fetchData, 1000);
+      initThree();
+      render(); 
+      setDots();
     });
 
     onUnmounted(() => {
-      // 컴포넌트가 언마운트되면 정리 작업
       if (frameId !== null) {
         cancelAnimationFrame(frameId);
       }
