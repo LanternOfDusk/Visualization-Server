@@ -130,8 +130,6 @@ export default {
 
     const setDots = () => {
       addDot(2);
-      addDot(5);
-      addDot(7);
     }
 
     const addDot = (id) => {
@@ -147,17 +145,22 @@ export default {
       dots[id] = {
         point: point,
         animation: {
-          increase : true
+          increase : true,
+          frame : 0
         }
       }
     }
 
     const animateDot = (id) => {
       if (dots[id].point.material.opacity > 1) {
+        dots[id].point.material.opacity = 1;
         dots[id].animation.increase = false;
+        dots[id].animation.frame = 0;
       }
       if (dots[id].point.material.opacity < 0) {
+        dots[id].point.material.opacity = 0;
         dots[id].animation.increase = true;
+        dots[id].animation.frame = 0;
       }
       
       if (dots[id].point.material.opacity <= 0) {
@@ -165,8 +168,31 @@ export default {
         dots[id].point.position.set(data[0], data[1], data[2]);
       }
 
-      if (dots[id].animation.increase) dots[id].point.material.opacity += 0.02;
-      else dots[id].point.material.opacity -= 0.02;
+      if (dots[id].animation.increase) {
+        dots[id].point.material.opacity += bezierCurves(dots[id].animation.frame);
+      }
+      else {
+        dots[id].point.material.opacity -= bezierCurves(dots[id].animation.frame);
+      }
+
+      dots[id].animation.frame++;
+    }
+
+    function bezierCurves(frame) {
+      const t = frame / 200;
+
+      const ps = { t : 0, y : 0 };
+      const p0 = { t : 20, y : 0.1 };
+      const p1 = { t : 150, y : 0.9 };
+      const pe = { t : 200, y : 1 };
+
+      const mt = 1 - t;
+      const mt2 = Math.pow(mt, 2);
+      const mt3 = Math.pow(mt, 3);
+      const t2 = Math.pow(t, 2);
+      const t3 = Math.pow(t, 3);
+
+      return mt3 * ps.y + 3 * mt2 * t * p0.y + 3 * mt * t2 * p1.y + t3 * pe.y;
     }
 
     function getData(id) {
