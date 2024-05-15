@@ -12,7 +12,6 @@
 <style>
 body {
   margin: 0;
-  padding: 0;
 }
 
 #app {
@@ -24,7 +23,7 @@ body {
 }
 
 nav {
-  position: absolute;
+  position: fixed;
   height: 60px;
   line-height: 60px;
   width: 100vw;

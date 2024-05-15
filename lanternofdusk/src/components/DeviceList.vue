@@ -15,13 +15,14 @@ export default {
 
 <style scoped>
 .device-list {
-  width: 300px;
+  width: 40vw;
   height: 80vh;
   background-color: #2c3e50;
 }
 ul {
   list-style-type: none;
   padding: 0;
+  margin: 0;
 }
 li {
   padding: 5px;

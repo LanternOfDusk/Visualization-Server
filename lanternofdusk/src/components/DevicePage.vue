@@ -17,10 +17,9 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .device {
-  padding-top: 100px;
+  padding-top: 120px;
 }
 h2 {
   margin: 0;

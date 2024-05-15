@@ -5,6 +5,7 @@
 <script>
 import { ref, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
+import {ThreeMFLoader} from "three/examples/jsm/loaders/3MFLoader";
 
 export default {
   name: 'MainMonitor',
@@ -34,9 +35,35 @@ export default {
         threeContainer.value.appendChild(renderer.domElement);
       }
 
+      const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x8d8d8d, 0.1 );
+      hemiLight.position.set( 0, 100, 0 );
+      scene.add( hemiLight );
+
+      const dirLight = new THREE.DirectionalLight( 0xffffff, 3 );
+      dirLight.position.set( - 0, 40, 50 );
+      dirLight.castShadow = true;
+      dirLight.shadow.camera.top = 50;
+      dirLight.shadow.camera.bottom = - 25;
+      dirLight.shadow.camera.left = - 25;
+      dirLight.shadow.camera.right = 25;
+      dirLight.shadow.camera.near = 0.1;
+      dirLight.shadow.camera.far = 200;
+      dirLight.shadow.mapSize.set( 1024, 1024 );
+      scene.add( dirLight );
+
+
       // 바닥 설정
-      const grid = new THREE.GridHelper(100, 20);
+      const grid = new THREE.GridHelper(200, 40);
       scene.add( grid );
+
+      const loader = new ThreeMFLoader();
+      const modelUrl = new URL('../assets/test.3mf', import.meta.url).href;
+      loader.load(modelUrl, function ( model ) {
+        model.rotation.set( - Math.PI / 2, 0, Math.PI / 2 );
+        model.position.set(0, 0, 100);
+        model.scale.set(8,8,8);
+        scene.add(model);
+      });
 
       // 이벤트 핸들러 설정
       window.addEventListener('resize', onWindowResize);
@@ -129,7 +156,7 @@ export default {
     }
 
     const setDots = () => {
-      addDot(2);
+      addDot(1);
     }
 
     const addDot = (id) => {
@@ -141,9 +168,9 @@ export default {
       });
       const point = new THREE.Mesh(geometry, material);
       scene.add(point);
-      point.animations
       dots[id] = {
         point: point,
+        lastUpdate: 0,
         animation: {
           increase : true,
           frame : 0
@@ -196,6 +223,7 @@ export default {
     }
 
     function getData(id) {
+      
       return [0,id,0];
     }
 
@@ -225,8 +253,7 @@ export default {
 
 <style scoped>
 .three-container {
-  width: 100%;
+  width: 100vw;
   height: 100vh;
-  overflow: hidden;
 }
 </style>

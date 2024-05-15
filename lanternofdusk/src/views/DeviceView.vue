@@ -1,23 +1,17 @@
 <template>
   <div class="device">
-    <DevicePage msg="Lantern Of Dusk"/>
+    <DeviceList msg="Lantern Of Dusk"/>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import DevicePage from '@/components/DevicePage.vue'
+import DeviceList from '@/components/DeviceList.vue'
 
 export default {
   name: 'DeviceView',
   components: {
-    DevicePage
+    DeviceList
   }
 }
 </script>
-
-<style scoped>
-img {
-  margin-top: 40px;
-}
-</style>

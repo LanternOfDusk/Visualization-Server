@@ -1,5 +1,6 @@
 <template>
   <div class="hello">
+    <img alt="Vue logo" src="@/assets/logo.png">
     <h1>{{ msg }}</h1>
     <h2>사이트맵</h2>
     <ul>
@@ -21,10 +22,9 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1 {
-  margin: 0;
+.hello {
+  padding-top: 120px;
 }
 ul {
   list-style-type: none;
@@ -32,7 +32,6 @@ ul {
 }
 li {
   padding: 5px;
-  margin: 0 10px;
 }
 a {
   color: #42b983;
