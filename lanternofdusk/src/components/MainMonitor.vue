@@ -6,6 +6,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
 import {ThreeMFLoader} from "three/examples/jsm/loaders/3MFLoader";
+import axios from 'axios';
 
 export default {
   name: 'MainMonitor',
@@ -21,51 +22,68 @@ export default {
     let frameId;
 
     const initThree = () => {
-      // scene 설정
       scene.background = new THREE.Color(0xffffff);
       
-      // camera 설정
       camera.position.set(0, 20, 80);
       camera.rotation.order = 'YXZ';
 
-      // 렌더러 설정
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(window.devicePixelRatio);
       if (threeContainer.value) {
         threeContainer.value.appendChild(renderer.domElement);
       }
 
-      const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x8d8d8d, 0.1 );
-      hemiLight.position.set( 0, 100, 0 );
-      scene.add( hemiLight );
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
+      hemiLight.position.set(0, 100, 0);
+      scene.add(hemiLight);
 
-      const dirLight = new THREE.DirectionalLight( 0xffffff, 3 );
-      dirLight.position.set( - 0, 40, 50 );
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+      dirLight.position.set(0, 50, 50);
       dirLight.castShadow = true;
+
       dirLight.shadow.camera.top = 50;
-      dirLight.shadow.camera.bottom = - 25;
-      dirLight.shadow.camera.left = - 25;
-      dirLight.shadow.camera.right = 25;
-      dirLight.shadow.camera.near = 0.1;
+      dirLight.shadow.camera.bottom = -50;
+      dirLight.shadow.camera.left = -50;
+      dirLight.shadow.camera.right = 50;
+      dirLight.shadow.camera.near = 0.5;
       dirLight.shadow.camera.far = 200;
-      dirLight.shadow.mapSize.set( 1024, 1024 );
-      scene.add( dirLight );
 
+      dirLight.shadow.mapSize.width = 2048;
+      dirLight.shadow.mapSize.height = 2048;
+      dirLight.shadow.bias = -0.001;
 
-      // 바닥 설정
-      const grid = new THREE.GridHelper(200, 40);
+      scene.add(dirLight);
+
+      const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+      scene.add(ambientLight);
+
+      const pointLight1 = new THREE.PointLight(0xffaa00, 1, 100);
+      pointLight1.position.set(50, 50, 50);
+      scene.add(pointLight1);
+
+      const pointLight2 = new THREE.PointLight(0x00aaff, 0.8, 100);
+      pointLight2.position.set(-50, -50, 50);
+      scene.add(pointLight2);
+
+      const grid = new THREE.GridHelper(1600, 320);
       scene.add( grid );
 
       const loader = new ThreeMFLoader();
-      const modelUrl = new URL('../assets/test.3mf', import.meta.url).href;
+      const modelUrl = new URL('../assets/Medialabs_1.3mf', import.meta.url).href;
       loader.load(modelUrl, function ( model ) {
         model.rotation.set( - Math.PI / 2, 0, Math.PI / 2 );
-        model.position.set(0, 0, 100);
-        model.scale.set(8,8,8);
+        model.scale.set(20,20,20);
+        model.traverse(function (child) {
+          if (child.isMesh) {
+            const material = child.material.clone();
+            material.transparent = true; // 투명도 활성화
+            material.opacity = 0.7; // 원하는 투명도 값 설정 (0.0 ~ 1.0)
+            child.material = material;
+          }
+        });
         scene.add(model);
       });
 
-      // 이벤트 핸들러 설정
       window.addEventListener('resize', onWindowResize);
       document.addEventListener('keydown', onKeyDown);
       document.addEventListener('keyup', onKeyUp);
@@ -107,6 +125,7 @@ export default {
 
     const render = () => {
       updateCamera();
+
       for (const key in dots) {
         animateDot(key);
       }
@@ -116,7 +135,7 @@ export default {
     };
 
     const updateCamera = () => {
-      let speed = keyStates['ControlLeft'] ? 1 : 0.5;
+      let speed = keyStates['ControlLeft'] ? 3 : 2;
 
       if (keyStates['KeyW']) {
         camera.position.add(getForwardVector().multiplyScalar(speed));
@@ -131,10 +150,10 @@ export default {
         camera.position.add(getSideVector().multiplyScalar(speed));
       }
       if (keyStates['Space']) {
-        camera.position.y += 0.5;
+        camera.position.y += 1;
       }
       if (keyStates['ShiftLeft']) {
-        camera.position.y -= 0.5;
+        camera.position.y -= 1;
       }
     }
 
@@ -155,30 +174,14 @@ export default {
       return cameraDirection;
     }
 
-    const setDots = () => {
-      addDot(1);
-    }
-
-    const addDot = (id) => {
-      const geometry = new THREE.SphereGeometry(0.5, 32, 32);
-      const material = new THREE.MeshBasicMaterial({ 
-        color: 0xff0000, 
-        transparent: true,
-        opacity: 0 
-      });
-      const point = new THREE.Mesh(geometry, material);
-      scene.add(point);
-      dots[id] = {
-        point: point,
-        lastUpdate: 0,
-        animation: {
-          increase : true,
-          frame : 0
-        }
-      }
-    }
-
     const animateDot = (id) => {
+      if (dots[id].animation.lost) {
+        dots[id].point.material.color.set(0x0000ff)
+      }
+      else {
+        dots[id].point.material.color.set(0xff0000)
+      }
+
       if (dots[id].point.material.opacity > 1) {
         dots[id].point.material.opacity = 1;
         dots[id].animation.increase = false;
@@ -190,9 +193,14 @@ export default {
         dots[id].animation.frame = 0;
       }
       
-      if (dots[id].point.material.opacity <= 0) {
-        let data = getData(id);
-        dots[id].point.position.set(data[0], data[1], data[2]);
+      if (dots[id].point.material.opacity == 0) {
+        if (dots[id].data.timestamp == dots[id].lastUpdate) {
+          dots[id].animation.lost = true;
+        }
+        else {
+          dots[id].animation.lost = false;
+        }
+        dots[id].point.position.set(dots[id].data.x, dots[id].data.y, dots[id].data.z);
       }
 
       if (dots[id].animation.increase) {
@@ -222,9 +230,50 @@ export default {
       return mt3 * ps.y + 3 * mt2 * t * p0.y + 3 * mt * t2 * p1.y + t3 * pe.y;
     }
 
-    function getData(id) {
+    const setDots = () => {
+      addDot(1);
+      setInterval(() => {
+        getData(1);
+      }, 1000);
+    }
+    const addDot = (id) => {
+      const geometry = new THREE.SphereGeometry(5, 32, 32);
+      const material = new THREE.MeshBasicMaterial({ 
+        color: 0xff0000, 
+        transparent: true,
+        opacity: 0 
+      });
+      const point = new THREE.Mesh(geometry, material);
+      scene.add(point);
       
-      return [0,id,0];
+      dots[id] = {
+        point: point,
+        lastUpdate: 0,
+        data: {
+          id : id,
+          x : 0,
+          y : 0,
+          z : 0,
+          timestamp : 0
+        },
+        animation: {
+          increase : true,
+          frame : 0,
+          lost : false
+        }
+      }
+    }
+
+    const getData = (id) => {
+      axios
+      .get('http://localhost:7777/api/device/position/test')
+      .then((response) => {
+        dots[id].data = response.data;
+        console.log(response.data);
+      })
+      .catch(() => {
+        console.log("nodata");
+      })
     }
 
     onMounted(() => {
