@@ -1,17 +1,17 @@
 <template>
   <div class="device">
-    <DeviceList msg="Lantern Of Dusk"/>
+    <DevicePage msg="Lantern Of Dusk"/>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import DeviceList from '@/components/DeviceList.vue'
+import DevicePage from '@/components/DevicePage.vue'
 
 export default {
   name: 'DeviceView',
   components: {
-    DeviceList
+    DevicePage
   }
 }
 </script>

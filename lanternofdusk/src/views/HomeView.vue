@@ -15,9 +15,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-img {
-  margin-top: 110px;
-}
-</style>

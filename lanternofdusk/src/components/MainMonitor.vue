@@ -10,6 +10,7 @@ import axios from 'axios';
 
 export default {
   name: 'MainMonitor',
+
   setup() {
     const threeContainer = ref(null);
 
@@ -40,18 +41,15 @@ export default {
       const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
       dirLight.position.set(0, 50, 50);
       dirLight.castShadow = true;
-
       dirLight.shadow.camera.top = 50;
       dirLight.shadow.camera.bottom = -50;
       dirLight.shadow.camera.left = -50;
       dirLight.shadow.camera.right = 50;
       dirLight.shadow.camera.near = 0.5;
       dirLight.shadow.camera.far = 200;
-
       dirLight.shadow.mapSize.width = 2048;
       dirLight.shadow.mapSize.height = 2048;
       dirLight.shadow.bias = -0.001;
-
       scene.add(dirLight);
 
       const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
@@ -60,7 +58,7 @@ export default {
       const pointLight1 = new THREE.PointLight(0xffaa00, 1, 100);
       pointLight1.position.set(50, 50, 50);
       scene.add(pointLight1);
-
+      
       const pointLight2 = new THREE.PointLight(0x00aaff, 0.8, 100);
       pointLight2.position.set(-50, -50, 50);
       scene.add(pointLight2);
@@ -69,16 +67,17 @@ export default {
       scene.add( grid );
 
       const loader = new ThreeMFLoader();
-      const modelUrl = new URL('../assets/Medialabs_1.3mf', import.meta.url).href;
+      const modelUrl = new URL('../assets/medialabs.3mf', import.meta.url).href;
       loader.load(modelUrl, function ( model ) {
         model.rotation.set( - Math.PI / 2, 0, Math.PI / 2 );
         model.scale.set(20,20,20);
         model.traverse(function (child) {
           if (child.isMesh) {
             const material = child.material.clone();
-            material.transparent = true; // 투명도 활성화
-            material.opacity = 0.7; // 원하는 투명도 값 설정 (0.0 ~ 1.0)
+            material.transparent = true;
+            material.opacity = 0.7;
             child.material = material;
+            child.renderOrder = 1; // 렌더 순서 설정
           }
         });
         scene.add(model);
@@ -176,19 +175,23 @@ export default {
 
     const animateDot = (id) => {
       if (dots[id].animation.lost) {
-        dots[id].point.material.color.set(0x0000ff)
+        dots[id].point.material.color.set(0x0000ff);
+        dots[id].rod.material.color.set(0x0000ff);
       }
       else {
-        dots[id].point.material.color.set(0xff0000)
+        dots[id].point.material.color.set(0xff0000);
+        dots[id].rod.material.color.set(0xff0000);
       }
 
       if (dots[id].point.material.opacity > 1) {
         dots[id].point.material.opacity = 1;
+        dots[id].rod.material.opacity = 1;
         dots[id].animation.increase = false;
         dots[id].animation.frame = 0;
       }
       if (dots[id].point.material.opacity < 0) {
         dots[id].point.material.opacity = 0;
+        dots[id].rod.material.opacity = 0;
         dots[id].animation.increase = true;
         dots[id].animation.frame = 0;
       }
@@ -201,13 +204,17 @@ export default {
           dots[id].animation.lost = false;
         }
         dots[id].point.position.set(dots[id].data.x, dots[id].data.y, dots[id].data.z);
+        dots[id].rod.position.set(dots[id].data.x, dots[id].data.y + 5, dots[id].data.z);
+        dots[id].rod.rotation.set(dots[id].data.rx, dots[id].data.ry, dots[id].data.rz);
       }
 
       if (dots[id].animation.increase) {
         dots[id].point.material.opacity += bezierCurves(dots[id].animation.frame);
+        dots[id].rod.material.opacity += bezierCurves(dots[id].animation.frame);
       }
       else {
         dots[id].point.material.opacity -= bezierCurves(dots[id].animation.frame);
+        dots[id].rod.material.opacity -= bezierCurves(dots[id].animation.frame);
       }
 
       dots[id].animation.frame++;
@@ -236,6 +243,7 @@ export default {
         getData(1);
       }, 1000);
     }
+
     const addDot = (id) => {
       const geometry = new THREE.SphereGeometry(5, 32, 32);
       const material = new THREE.MeshBasicMaterial({ 
@@ -245,15 +253,29 @@ export default {
       });
       const point = new THREE.Mesh(geometry, material);
       scene.add(point);
+
+      const rodGeometry = new THREE.CylinderGeometry(0.5, 0.5, 20, 32);
+      const rodMaterial = new THREE.MeshBasicMaterial({ 
+        color: 0xff0000,
+        transparent: true,
+        opacity: 0 
+       });
+      const rod = new THREE.Mesh(rodGeometry, rodMaterial);
+      rod.rotation.z = Math.PI / 2;
+      scene.add(rod);
       
       dots[id] = {
         point: point,
+        rod: rod,
         lastUpdate: 0,
         data: {
           id : id,
           x : 0,
           y : 0,
           z : 0,
+          rx : 0,
+          ry : 0,
+          rz : 0,
           timestamp : 0
         },
         animation: {

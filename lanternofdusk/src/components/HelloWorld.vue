@@ -2,14 +2,40 @@
   <div class="hello">
     <img alt="Vue logo" src="@/assets/logo.png">
     <h1>{{ msg }}</h1>
-    <h2>사이트맵</h2>
-    <ul>
-      <li><router-link to="/">Home - 메인 페이지</router-link></li>
-      <li><router-link to="/monitor">Monitor - 메인 관제 페이지</router-link></li>
-      <li><router-link to="/navigation">Navigation - 단말기 네비게이션 페이지</router-link></li>
-      <li><router-link to="/device">Device - 단말기 관리 페이지</router-link></li>
-      <li><router-link to="/about">About - 소개 페이지</router-link></li>
-    </ul>
+    <br>
+    <br>
+    <div class="button-group">
+      <router-link to="/" class="button">
+        <div class="button-content">
+          <div class="button-name">Home</div>
+          <div class="button-description">메인 페이지</div>
+        </div>
+      </router-link>
+      <router-link to="/monitor" class="button">
+        <div class="button-content">
+          <div class="button-name">Monitor</div>
+          <div class="button-description">메인 관제 페이지</div>
+        </div>
+      </router-link>
+      <router-link to="/navigation" class="button">
+        <div class="button-content">
+          <div class="button-name">Navigation</div>
+          <div class="button-description">단말기 네비게이션 페이지</div>
+        </div>
+      </router-link>
+      <router-link to="/device" class="button">
+        <div class="button-content">
+          <div class="button-name">Device</div>
+          <div class="button-description">단말기 관리 페이지</div>
+        </div>
+      </router-link>
+      <router-link to="/about" class="button">
+        <div class="button-content">
+          <div class="button-name">About</div>
+          <div class="button-description">소개 페이지</div>
+        </div>
+      </router-link>
+    </div>
   </div>
 </template>
 
@@ -24,16 +50,46 @@ export default {
 
 <style scoped>
 .hello {
+  text-align: center;
   padding-top: 120px;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Space between buttons */
 }
-li {
-  padding: 5px;
+.button {
+  display: inline-block;
+  width: 200px; /* Square shape */
+  height: 200px; /* Square shape */
+  color: #000;
+  background-color: transparent;
+  text-decoration: none;
+  border: 2px solid #8157CB;
+  border-radius: 10px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
-a {
-  color: #42b983;
+.button:hover {
+  background-color: #f0f0f0;
+  border-color: #6842a2;
+}
+.button-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+.button-name {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.button-description {
+  font-size: 0.9em;
+  color: #555;
+}
+img {
+  width: 250px;
 }
 </style>
