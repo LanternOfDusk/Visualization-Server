@@ -163,6 +163,7 @@ input[type="text"] {
   background-color: #ffb300;
 }
 .device-item:hover {
-  color: blue; /* 변경하고자 하는 글자 색상으로 설정 */
+  color: blue;
+  background-color: #e7e7e7;
 }
 </style>
