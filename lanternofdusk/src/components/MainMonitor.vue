@@ -18,8 +18,7 @@ export default {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     const keyStates = {};
-    const dots = {};
-
+    const markers = {};
     let frameId;
 
     const initThree = () => {
@@ -33,11 +32,12 @@ export default {
       if (threeContainer.value) {
         threeContainer.value.appendChild(renderer.domElement);
       }
-
+      
+      // 조명 설정
       const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
       hemiLight.position.set(0, 100, 0);
       scene.add(hemiLight);
-
+      
       const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
       dirLight.position.set(0, 50, 50);
       dirLight.castShadow = true;
@@ -63,9 +63,11 @@ export default {
       pointLight2.position.set(-50, -50, 50);
       scene.add(pointLight2);
 
+      // 바닥 그리드 로드
       const grid = new THREE.GridHelper(1600, 320);
       scene.add( grid );
-
+      
+      // 건물 모델 로드
       const loader = new ThreeMFLoader();
       const modelUrl = new URL('../assets/medialabs.3mf', import.meta.url).href;
       loader.load(modelUrl, function ( model ) {
@@ -89,7 +91,7 @@ export default {
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('click', onClick);
     };
-
+    
     const onWindowResize = () => {
       if (camera && renderer) {
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -97,22 +99,18 @@ export default {
         renderer.setSize(window.innerWidth, window.innerHeight);
       }
     };
-
     const onKeyDown = (event) => {
       keyStates[event.code] = true;
     };
-
     const onKeyUp = (event) => {
       keyStates[event.code] = false;
     };
-
     const onMouseMove = (event) => {
       if (document.pointerLockElement === document.body) {
         camera.rotation.y -= event.movementX / 700;
         camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x - event.movementY / 700));
       }
     };
-
     const onClick = () => {
       if (document.pointerLockElement === null) {
         document.body.requestPointerLock();
@@ -125,7 +123,7 @@ export default {
     const render = () => {
       updateCamera();
 
-      for (const key in dots) {
+      for (const key in markers) {
         animateDot(key);
       }
 
@@ -155,7 +153,6 @@ export default {
         camera.position.y -= 1;
       }
     }
-
     function getForwardVector() {
       let cameraDirection = new THREE.Vector3();
       camera.getWorldDirection(cameraDirection);
@@ -163,7 +160,6 @@ export default {
       cameraDirection.normalize();
       return cameraDirection;
     }
-
     function getSideVector() {
       let cameraDirection = new THREE.Vector3();
       camera.getWorldDirection(cameraDirection);
@@ -174,52 +170,44 @@ export default {
     }
 
     const animateDot = (id) => {
-      if (dots[id].animation.lost) {
-        dots[id].point.material.color.set(0x0000ff);
-        dots[id].rod.material.color.set(0x0000ff);
+      if (markers[id].animation.lost) {
+        markers[id].marker.material.color.set(0x0000ff);     
       }
       else {
-        dots[id].point.material.color.set(0xff0000);
-        dots[id].rod.material.color.set(0xff0000);
+        markers[id].marker.material.color.set(0xff0000);
       }
 
-      if (dots[id].point.material.opacity > 1) {
-        dots[id].point.material.opacity = 1;
-        dots[id].rod.material.opacity = 1;
-        dots[id].animation.increase = false;
-        dots[id].animation.frame = 0;
+      if (markers[id].marker.material.opacity > 1) {
+        markers[id].marker.material.opacity = 1;
+        markers[id].animation.increase = false;
+        markers[id].animation.frame = 0;
       }
-      if (dots[id].point.material.opacity < 0) {
-        dots[id].point.material.opacity = 0;
-        dots[id].rod.material.opacity = 0;
-        dots[id].animation.increase = true;
-        dots[id].animation.frame = 0;
+
+      if (markers[id].marker.material.opacity < 0) {
+        markers[id].marker.material.opacity = 0;
+        markers[id].animation.increase = true;
+        markers[id].animation.frame = 0;
       }
       
-      if (dots[id].point.material.opacity == 0) {
-        if (dots[id].data.timestamp == dots[id].lastUpdate) {
-          dots[id].animation.lost = true;
+      if (markers[id].marker.material.opacity == 0) {
+        if (markers[id].data.timestamp == markers[id].lastUpdate) {
+          markers[id].animation.lost = true;
         }
         else {
-          dots[id].animation.lost = false;
+          markers[id].animation.lost = false;
         }
-        dots[id].point.position.set(dots[id].data.x, dots[id].data.y, dots[id].data.z);
-        dots[id].rod.position.set(dots[id].data.x, dots[id].data.y + 5, dots[id].data.z);
-        dots[id].rod.rotation.set(dots[id].data.rx, dots[id].data.ry, dots[id].data.rz);
+        markers[id].marker.position.set(markers[id].data.px, markers[id].data.py, markers[id].data.pz);
+        markers[id].marker.rotation.set(markers[id].data.rx, markers[id].data.ry, markers[id].data.rz);
       }
 
-      if (dots[id].animation.increase) {
-        dots[id].point.material.opacity += bezierCurves(dots[id].animation.frame);
-        dots[id].rod.material.opacity += bezierCurves(dots[id].animation.frame);
+      if (markers[id].animation.increase) {
+        markers[id].marker.material.opacity += bezierCurves(markers[id].animation.frame);
       }
       else {
-        dots[id].point.material.opacity -= bezierCurves(dots[id].animation.frame);
-        dots[id].rod.material.opacity -= bezierCurves(dots[id].animation.frame);
+        markers[id].marker.material.opacity -= bezierCurves(markers[id].animation.frame);
       }
-
-      dots[id].animation.frame++;
+      markers[id].animation.frame++;
     }
-
     function bezierCurves(frame) {
       const t = frame / 200;
 
@@ -237,42 +225,34 @@ export default {
       return mt3 * ps.y + 3 * mt2 * t * p0.y + 3 * mt * t2 * p1.y + t3 * pe.y;
     }
 
-    const setDots = () => {
-      addDot(1);
-      setInterval(() => {
-        getData(1);
-      }, 1000);
+    const setMarkers = () => {
+      const list = [1];
+      for (const id in list) {
+        addDot(id);
+      }
     }
-
     const addDot = (id) => {
-      const geometry = new THREE.SphereGeometry(5, 32, 32);
+      const geometry = new THREE.CylinderGeometry( 0, 2, 9, 10 );
       const material = new THREE.MeshBasicMaterial({ 
         color: 0xff0000, 
         transparent: true,
         opacity: 0 
       });
-      const point = new THREE.Mesh(geometry, material);
-      scene.add(point);
+      const marker = new THREE.Mesh(geometry, material);
+      scene.add(marker);
 
-      const rodGeometry = new THREE.CylinderGeometry(0.5, 0.5, 20, 32);
-      const rodMaterial = new THREE.MeshBasicMaterial({ 
-        color: 0xff0000,
-        transparent: true,
-        opacity: 0 
-       });
-      const rod = new THREE.Mesh(rodGeometry, rodMaterial);
-      rod.rotation.z = Math.PI / 2;
-      scene.add(rod);
+      const loop = setInterval(() => {
+        getData(id);
+      }, 1000);
       
-      dots[id] = {
-        point: point,
-        rod: rod,
+      markers[id] = {
+        marker: marker,
         lastUpdate: 0,
         data: {
           id : id,
-          x : 0,
-          y : 0,
-          z : 0,
+          px : 0,
+          py : 0,
+          pz : 0,
           rx : 0,
           ry : 0,
           rz : 0,
@@ -281,27 +261,35 @@ export default {
         animation: {
           increase : true,
           frame : 0,
-          lost : false
+          lost : false,
+          loop : loop
         }
       }
     }
-
     const getData = (id) => {
       axios
-      .get('http://localhost:7777/api/device/position/test')
-      .then((response) => {
-        dots[id].data = response.data;
-        console.log(response.data);
+      .get('http://203.253.128.177:7579/Mobius/LOD/GYRO/la', {
+        headers: {
+          'Accept': 'application/json',
+          'X-M2M-RI': '123adsf45',
+          'X-M2M-Origin': 'SOrigin'
+        }
       })
-      .catch(() => {
-        console.log("nodata");
+      .then((response) => {
+        markers[id].data.rx = response.data["m2m:cin"].con.gyro.x * Math.PI / 180;
+        markers[id].data.ry = response.data["m2m:cin"].con.gyro.y * Math.PI / 180;
+        markers[id].data.rz = response.data["m2m:cin"].con.gyro.z * Math.PI / 180;
+        console.log(response);
+      })
+      .catch((error) => {
+        console.log(error);
       })
     }
 
     onMounted(() => {
       initThree();
       render(); 
-      setDots();
+      setMarkers();
     });
 
     onUnmounted(() => {
@@ -313,6 +301,10 @@ export default {
       document.removeEventListener('keyup', onKeyUp);
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('click', onClick);
+
+      for (const key in markers) {
+        clearInterval(markers[key].animation.loop);
+      }
     });
 
     return {
