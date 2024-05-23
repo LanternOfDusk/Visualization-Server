@@ -5,7 +5,7 @@
       <div class="device-list">
         <ul>
           <li v-for="device in devices" :key="device.id" class="device-item" @click="selectDevice(device)">
-            {{ device.name }} - {{ device.ae }}
+            {{ device.name }} - {{ device.applicationEntity }}
           </li>
         </ul>
       </div>
@@ -23,8 +23,8 @@
             <input type="text" id="name" v-model="newDevice.name">
           </div>
           <div class="form-group">
-            <label for="ae">AE</label>
-            <input type="text" id="ae" v-model="newDevice.ae">
+            <label for="applicationEntity">AE</label>
+            <input type="text" id="applicationEntity" v-model="newDevice.applicationEntity">
           </div>
           <div class="button-group">
             <button v-if="isEditMode" type="button" class="delete-btn" @click="deleteDevice">Delete</button>
@@ -38,46 +38,66 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'DevicePage',
   data() {
     return {
-      devices: [
-        { id: '1', name: 'test1', ae: 'device1' },
-        { id: '2', name: 'test2', ae: 'device2' },
-        { id: '3', name: 'test3', ae: 'device3' }
-      ],
-      newDevice: { id: '', name: '', ae: '' },
+      devices: [],
+      newDevice: { id: '', name: '', applicationEntity: '' },
       isEditMode: false
-    }
+    };
   },
   methods: {
-    selectDevice(device) {
+    async fetchDevices() { //서버에서 디바이스 목록 호출
+      try {
+        const response = await axios.get('http://58.120.21.139:7777/api/connection/list');
+        this.devices = response.data;
+      } catch (error) {
+        console.error('디바이스 목록을 가져오는 중 오류 발생:', error);
+      }
+    },
+    selectDevice(device) { //Create Device, Edit Device, Device List 폼 중 하나 선택
       this.newDevice = { ...device };
       this.isEditMode = true;
     },
-    updateDevice() {
-      let index = this.devices.findIndex(d => d.id === this.newDevice.id);
-      if (index !== -1) {
-        this.devices[index] = { ...this.newDevice };
+    async updateDevice() { //디바이스 정보 서버에 업데이트
+      try {
+        await axios.put(`http://58.120.21.139:7777/api/connection/${this.newDevice.id}`, this.newDevice);
+        this.fetchDevices();
+        this.resetForm();
+      } catch (error) {
+        console.error('디바이스를 업데이트하는 중 오류 발생:', error);
       }
-      this.resetForm();
     },
-    createDevice() {
-      this.newDevice.id = (this.devices.length + 1).toString();
-      this.devices.push({ ...this.newDevice });
-      this.resetForm();
+    async createDevice() { //새로운 디바이스 서버에 생성
+      try {
+        await axios.post('http://58.120.21.139:7777/api/connection', this.newDevice);
+        this.fetchDevices();
+        this.resetForm();
+      } catch (error) {
+        console.error('디바이스를 생성하는 중 오류 발생:', error);
+      }
     },
-    deleteDevice() {
-      this.devices = this.devices.filter(d => d.id !== this.newDevice.id);
-      this.resetForm();
+    async deleteDevice() { //선택된 디바이스 서버에서 삭제
+      try {
+        await axios.delete(`http://58.120.21.139:7777/api/connection/${this.newDevice.id}`);
+        this.fetchDevices();
+        this.resetForm();
+      } catch (error) {
+        console.error('디바이스를 삭제하는 중 오류 발생:', error);
+      }
     },
-    resetForm() {
-      this.newDevice = { id: '', name: '', ae: '' };
+    resetForm() { //폼 리셋
+      this.newDevice = { id: '', name: '', applicationEntity: '' };
       this.isEditMode = false;
     }
+  },
+  mounted() {
+    this.fetchDevices(); 
   }
-}
+};
 </script>
 
 <style scoped>
@@ -89,7 +109,7 @@ export default {
 }
 .section {
   display: inline-block;
-  width : 50%;
+  width: 50%;
   height: 300px;
 }
 .section-title {
