@@ -1,11 +1,10 @@
 <template>
   <div class="device">
-    <DevicePage msg="Lantern Of Dusk"/>
+    <DevicePage/>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
 import DevicePage from '@/components/DevicePage.vue'
 
 export default {

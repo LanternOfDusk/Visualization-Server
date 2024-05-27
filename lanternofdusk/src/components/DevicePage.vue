@@ -5,7 +5,7 @@
       <div class="device-list">
         <ul>
           <li v-for="device in devices" :key="device.id" class="device-item" @click="selectDevice(device)">
-            {{ device.name }} - {{ device.applicationEntity }}
+            {{ device.name }} - {{ device.ae }}
           </li>
         </ul>
       </div>
@@ -23,8 +23,8 @@
             <input type="text" id="name" v-model="newDevice.name">
           </div>
           <div class="form-group">
-            <label for="applicationEntity">AE</label>
-            <input type="text" id="applicationEntity" v-model="newDevice.applicationEntity">
+            <label for="ae">AE</label>
+            <input type="text" id="ae" v-model="newDevice.ae">
           </div>
           <div class="button-group">
             <button v-if="isEditMode" type="button" class="delete-btn" @click="deleteDevice">Delete</button>
@@ -45,7 +45,7 @@ export default {
   data() {
     return {
       devices: [],
-      newDevice: { id: '', name: '', applicationEntity: '' },
+      newDevice: { id: '', name: '', ae: '' },
       isEditMode: false
     };
   },
@@ -90,7 +90,7 @@ export default {
       }
     },
     resetForm() { //폼 리셋
-      this.newDevice = { id: '', name: '', applicationEntity: '' };
+      this.newDevice = { id: '', name: '', ae: '' };
       this.isEditMode = false;
     }
   },

@@ -4,6 +4,7 @@ import HomeView from '../views/HomeView.vue'
 import MonitorView from '../views/MonitorView.vue'
 import AboutView from '../views/AboutView.vue'
 import DeviceView from '../views/DeviceView.vue'
+import NavigationView from '@/views/NavigationView.vue'
 
 const routes = [
   {
@@ -25,6 +26,11 @@ const routes = [
     path: '/about',
     name: 'about',
     component: AboutView
+  },
+  {
+    path: '/navigation',
+    name: 'navigation',
+    component: NavigationView
   }
 ]
 

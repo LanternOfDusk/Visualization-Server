@@ -56,12 +56,12 @@ export default {
 .button-group {
   display: flex;
   justify-content: center;
-  gap: 20px; /* Space between buttons */
+  gap: 20px;
 }
 .button {
   display: inline-block;
-  width: 200px; /* Square shape */
-  height: 200px; /* Square shape */
+  width: 200px;
+  height: 200px;
   color: #000;
   background-color: transparent;
   text-decoration: none;

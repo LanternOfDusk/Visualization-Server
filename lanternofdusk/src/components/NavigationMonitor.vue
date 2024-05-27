@@ -7,7 +7,6 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
 import {ThreeMFLoader} from "three/examples/jsm/loaders/3MFLoader";
 import axios from 'axios';
-import GUI from 'lil-gui';
 
 export default {
   name: 'MainMonitor',
@@ -19,8 +18,7 @@ export default {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     const keyStates = {};
-    const dots = {};
-    const markers = [];
+    const markers = {};
     let frameId;
 
     const initThree = () => {
@@ -29,36 +27,10 @@ export default {
       camera.position.set(0, 20, 80);
       camera.rotation.order = 'YXZ';
 
-      const controll = new GUI({ autoPlace: false, width: '200px' });
-      let obj = {
-        Forward: 'W',
-        Back: 'S',
-        Left: 'A',
-        Right: 'D',
-        Up: 'Space',
-        Down: 'LeftShift',
-        SpeedUp: 'LeftControl',
-        SetMarker: 'M'
-      }
-      controll.add( obj, 'Forward' );
-      controll.add( obj, 'Back' );
-      controll.add( obj, 'Left' );
-      controll.add( obj, 'Right' );
-      controll.add( obj, 'Up' );
-      controll.add( obj, 'Down' );
-      controll.add( obj, 'SpeedUp' );
-      controll.add( obj, 'SetMarker');
-
-      controll.domElement.style.position = 'fixed';
-      controll.domElement.style.right = '0px';
-      controll.domElement.style.bottom = '0px';
-      controll.domElement.style.zIndex = '1000';
-
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(window.devicePixelRatio);
       if (threeContainer.value) {
         threeContainer.value.appendChild(renderer.domElement);
-        threeContainer.value.appendChild(controll.domElement);
       }
       
       // 조명 설정
@@ -117,7 +89,7 @@ export default {
       document.addEventListener('keydown', onKeyDown);
       document.addEventListener('keyup', onKeyUp);
       document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('click', onClick);      
+      document.addEventListener('click', onClick);
     };
     
     const onWindowResize = () => {
@@ -128,13 +100,7 @@ export default {
       }
     };
     const onKeyDown = (event) => {
-      if (event.code == 'KeyM') {
-        addMarker(camera.position);
-        createMarker(camera.position);
-      }
-      else {
-        keyStates[event.code] = true;
-      }
+      keyStates[event.code] = true;
     };
     const onKeyUp = (event) => {
       keyStates[event.code] = false;
@@ -157,7 +123,7 @@ export default {
     const render = () => {
       updateCamera();
 
-      for (const key in dots) {
+      for (const key in markers) {
         animateDot(key);
       }
 
@@ -204,43 +170,43 @@ export default {
     }
 
     const animateDot = (id) => {
-      if (dots[id].animation.lost) {
-        dots[id].marker.material.color.set(0x808080);     
+      if (markers[id].animation.lost) {
+        markers[id].marker.material.color.set(0x808080);     
       }
       else {
-        dots[id].marker.material.color.set(0xff0000);
+        markers[id].marker.material.color.set(0xff0000);
       }
 
-      if (dots[id].marker.material.opacity > 1) {
-        dots[id].marker.material.opacity = 1;
-        dots[id].animation.increase = false;
-        dots[id].animation.frame = 0;
+      if (markers[id].marker.material.opacity > 1) {
+        markers[id].marker.material.opacity = 1;
+        markers[id].animation.increase = false;
+        markers[id].animation.frame = 0;
       }
 
-      if (dots[id].marker.material.opacity < 0) {
-        dots[id].marker.material.opacity = 0;
-        dots[id].animation.increase = true;
-        dots[id].animation.frame = 0;
+      if (markers[id].marker.material.opacity < 0) {
+        markers[id].marker.material.opacity = 0;
+        markers[id].animation.increase = true;
+        markers[id].animation.frame = 0;
       }
       
-      if (dots[id].marker.material.opacity == 0) {
-        if (dots[id].data.timestamp == dots[id].lastUpdate) {
-          dots[id].animation.lost = true;
+      if (markers[id].marker.material.opacity == 0) {
+        if (markers[id].data.timestamp == markers[id].lastUpdate) {
+          markers[id].animation.lost = true;
         }
         else {
-          dots[id].animation.lost = false;
+          markers[id].animation.lost = false;
         }
-        dots[id].marker.position.set(dots[id].data.px, dots[id].data.py, dots[id].data.pz);
-        dots[id].marker.rotation.set(dots[id].data.rx, dots[id].data.ry, dots[id].data.rz);
+        markers[id].marker.position.set(markers[id].data.px, markers[id].data.py, markers[id].data.pz);
+        markers[id].marker.rotation.set(markers[id].data.rx, markers[id].data.ry, markers[id].data.rz);
       }
 
-      if (dots[id].animation.increase) {
-        dots[id].marker.material.opacity += bezierCurves(dots[id].animation.frame);
+      if (markers[id].animation.increase) {
+        markers[id].marker.material.opacity += bezierCurves(markers[id].animation.frame);
       }
       else {
-        dots[id].marker.material.opacity -= bezierCurves(dots[id].animation.frame);
+        markers[id].marker.material.opacity -= bezierCurves(markers[id].animation.frame);
       }
-      dots[id].animation.frame++;
+      markers[id].animation.frame++;
     }
     function bezierCurves(frame) {
       const t = frame / 200;
@@ -259,7 +225,7 @@ export default {
       return mt3 * ps.y + 3 * mt2 * t * p0.y + 3 * mt * t2 * p1.y + t3 * pe.y;
     }
 
-    const setDots = () => {
+    const setMarkers = () => {
       const list = [1];
       for (const id in list) {
         addDot(id);
@@ -279,7 +245,7 @@ export default {
         getData(id);
       }, 1000);
       
-      dots[id] = {
+      markers[id] = {
         marker: marker,
         lastUpdate: 0,
         data: {
@@ -310,9 +276,9 @@ export default {
         }
       })
       .then((response) => {
-        dots[id].data.rx = response.data["m2m:cin"].con.gyro.x * Math.PI / 180;
-        dots[id].data.ry = response.data["m2m:cin"].con.gyro.y * Math.PI / 180;
-        dots[id].data.rz = response.data["m2m:cin"].con.gyro.z * Math.PI / 180;
+        markers[id].data.rx = response.data["m2m:cin"].con.gyro.x * Math.PI / 180;
+        markers[id].data.ry = response.data["m2m:cin"].con.gyro.y * Math.PI / 180;
+        markers[id].data.rz = response.data["m2m:cin"].con.gyro.z * Math.PI / 180;
         console.log(response);
       })
       .catch((error) => {
@@ -320,52 +286,9 @@ export default {
       })
     }
 
-    const setMarkers = () => {
-      axios
-      .get('http://58.120.21.139:7777/api/marker/list')
-      .then((response) => {
-        for (const data of response.data) {
-          console.log(data);
-          addMarker(data);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    }
-
-    const addMarker = (position) => {
-      const geometry = new THREE.SphereGeometry( 5, 20, 20 );
-      const material = new THREE.MeshBasicMaterial({ 
-        color: 0x00ff00
-      });
-      const marker = new THREE.Mesh(geometry, material);
-      marker.position.set(position.x, position.y, position.z);
-      scene.add(marker);
-      console.log(position, "add");
-
-      markers.push(marker);
-    }
-
-    const createMarker = (position) => {
-      try {
-        axios.post('http://58.120.21.139:7777/api/marker', 
-          { 
-            name:'('+parseInt(position.x)+','+parseInt(position.y)+','+parseInt(position.z)+')', 
-            x:position.x, 
-            y:position.y, 
-            z:position.z
-          }
-        );
-      } catch (error) {
-        console.error('디바이스를 생성하는 중 오류 발생:', error);
-      }
-    }
-
     onMounted(() => {
       initThree();
       render(); 
-      setDots();
       setMarkers();
     });
 
@@ -379,8 +302,8 @@ export default {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('click', onClick);
 
-      for (const key in dots) {
-        clearInterval(dots[key].animation.loop);
+      for (const key in markers) {
+        clearInterval(markers[key].animation.loop);
       }
     });
 

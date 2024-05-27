@@ -1,6 +1,6 @@
 <template>
-  <div ref="threeContainer" class="three-container">
-    <MainMonitor msg="Lantern Of Dusk"/>
+  <div class="monitor">
+    <MainMonitor/>
   </div>
 </template>
 
