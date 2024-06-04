@@ -4,8 +4,8 @@
       <h2 class="section-title">Device List</h2>
       <div class="device-list">
         <ul>
-          <li v-for="device in devices" :key="device.id" class="device-item" @click="selectDevice(device)">
-            {{ device.name }} - {{ device.ae }}
+          <li v-for="device in devices" :key="device.id" class="device-item">
+            <router-link :to="{ name: 'navigationMonitor', params: { ae: device.ae }}">{{ device.ae }} : {{ device.name }} - {{ device.ae }}</router-link>
           </li>
         </ul>
       </div>
@@ -13,30 +13,22 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from 'vue';
 import axios from 'axios';
 
-export default {
-  name: 'NavigationPage',
-  data() {
-    return {
-      devices: []
-    };
-  },
-  methods: {
-    async fetchDevices() {
-      try {
-        const response = await axios.get('http://58.120.21.139:7777/api/connection/list');
-        this.devices = response.data;
-      } catch (error) {
-        console.error('디바이스 목록을 가져오는 중 오류 발생:', error);
-      }
-    }
-  },
-  mounted() {
-    this.fetchDevices(); 
+const devices = ref([]);
+
+async function fetchDevices() {
+  try {
+    const response = await axios.get('http://58.120.21.139:7777/api/connection/list');
+    devices.value = response.data;
+  } catch (error) {
+    console.error('디바이스 목록을 가져오는 중 오류 발생:', error);
   }
-};
+}
+
+onMounted(fetchDevices);
 </script>
 
 <style scoped>

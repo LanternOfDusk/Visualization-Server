@@ -16,6 +16,7 @@
     "three": "^0.164.1",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
+    "vue3-websocket": "^2.1.2",
     "vuex": "^4.1.0"
   },
   "devDependencies": {
