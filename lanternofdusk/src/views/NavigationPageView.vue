@@ -5,7 +5,7 @@
       <div class="device-list">
         <ul>
           <li v-for="device in devices" :key="device.id" class="device-item">
-            <router-link :to="{ name: 'navigationMonitor', params: { ae: device.ae }}">{{ device.ae }} : {{ device.name }} - {{ device.ae }}</router-link>
+            <router-link :to="{ name: 'navigationMonitor', params: { ae: device.ae }}">{{ device.name }} - {{ device.ae }}</router-link>
           </li>
         </ul>
       </div>
@@ -40,7 +40,7 @@ onMounted(fetchDevices);
 }
 .section {
   display: inline-block;
-  width: 50%;
+  width: 100%;
   height: 300px;
 }
 .section-title {

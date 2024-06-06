@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import HomeView from '../views/HomeView.vue'
 import MonitorView from '../views/MonitorView.vue'
-import AboutView from '../views/AboutView.vue'
+import MarkerView from '../views/MarkerView.vue'
 import DeviceView from '../views/DeviceView.vue'
 import NavigationPageView from '../views/NavigationPageView.vue'
 import NavigationMonitorView from '../views/NavigationMonitorView.vue'
@@ -24,9 +24,9 @@ const routes = [
     component: DeviceView,
   },
   {
-    path: '/about',
-    name: 'about',
-    component: AboutView
+    path: '/marker',
+    name: 'marker',
+    component: MarkerView
   },
   {
     path: '/navigation',
@@ -34,7 +34,7 @@ const routes = [
     component: NavigationPageView
   },
   {
-    path: '/navigation/:id',
+    path: '/navigation/:ae',
     name: 'navigationMonitor',
     component: NavigationMonitorView,
     props: true

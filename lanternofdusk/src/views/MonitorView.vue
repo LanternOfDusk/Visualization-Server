@@ -71,12 +71,12 @@ export default {
       const modelUrl = new URL('../assets/medialabs.3mf', import.meta.url).href;
       loader.load(modelUrl, function ( model ) {
         model.rotation.set( - Math.PI / 2, 0, Math.PI / 2 );
-        model.scale.set(20,20,20);
+        model.scale.set(27,27,27);
         model.traverse(function (child) {
           if (child.isMesh) {
             const material = child.material.clone();
             material.transparent = true;
-            material.opacity = 0.7;
+            material.opacity = 0.3;
             child.material = material;
             child.renderOrder = 1; // 렌더 순서 설정
           }
@@ -202,15 +202,15 @@ export default {
       }
       
       if (dots[ae].dot.material.opacity == 0) {
+        //getDataViaMobius(ae);
+        dots[ae].dot.position.set(dots[ae].data.x, dots[ae].data.y, dots[ae].data.z);
+
         if (dots[ae].data.timestamp == dots[ae].lastUpdate) {
           dots[ae].animation.lost = true;
         }
         else {
           dots[ae].animation.lost = false;
         }
-
-        getDataViaMobius(ae);
-        dots[ae].dot.position.set(dots[ae].data.x, dots[ae].data.y, dots[ae].data.z);
       }
 
       if (dots[ae].animation.increase) {
@@ -245,6 +245,7 @@ export default {
       .then((response) => {
         for (const device of response.data) {
           addDot(device.ae);
+          console.log(device.ae);
         }
       })
       .catch((error) => {
@@ -254,7 +255,7 @@ export default {
 
     const addDot = (ae) => {
       const geometry = new THREE.SphereGeometry( 5, 32, 16 );
-      const material = new THREE.MeshBasicMaterial({ 
+      const material = new THREE.MeshPhongMaterial({ 
         color: 0xff0000, 
         transparent: true,
         opacity: 0 
@@ -278,24 +279,49 @@ export default {
         }
       }
     }
-    const getDataViaMobius = (ae) => {
-      axios
-      .get("http://203.253.128.177:7579/Mobius/" + ae + "/DATA/la", {
-        headers: {
-          "Accept": "application/json",
-          "X-M2M-RI": "12345",
-          "X-M2M-Origin": "SOrigin"
-        }
-      })
-      .then((response) => {
+    // const getDataViaMobius = (ae) => {
+    //   axios
+    //   .get("http://203.253.128.177:7579/Mobius/" + ae + "/DATA/la", {
+    //     headers: {
+    //       "Accept": "application/json",
+    //       "X-M2M-RI": "12345",
+    //       "X-M2M-Origin": "SOrigin"
+    //     }
+    //   })
+    //   .then((response) => {
+    //     dots[ae].lastUpdate = dots[ae].data.timestamp
+    //     dots[ae].data.x = response.data['m2m:cin'].con.px;
+    //     dots[ae].data.y = response.data['m2m:cin'].con.py;
+    //     dots[ae].data.z = response.data['m2m:cin'].con.pz;
+    //     dots[ae].data.timestamp = response.data['m2m:cin'].con.timestamp;
+    //   })
+    // }
+    const getDataViaWebSoket = () => {
+      const ws = new WebSocket('ws://58.120.21.139:7777/ws?type=client');
+      
+      ws.onopen = () => {
+        console.log('WebSocket connected!');
+      };
+      
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        const { ae, px, py, pz, timestamp } = data;
+        
         dots[ae].lastUpdate = dots[ae].data.timestamp
-        dots[ae].data.x = response.data['m2m:cin'].con.px;
-        dots[ae].data.y = response.data['m2m:cin'].con.py;
-        dots[ae].data.z = response.data['m2m:cin'].con.pz;
-        dots[ae].data.timestamp = response.data['m2m:cin'].con.timestamp;
-      })
-    }
-
+        dots[ae].data.x = px;
+        dots[ae].data.y = py;
+        dots[ae].data.z = pz;
+        dots[ae].data.timestamp = timestamp;
+      };
+      
+      ws.onclose = () => {
+        console.log('WebSocket disconnected.');
+      };
+      
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+    };
 
     const setMarkers = () => {
       axios
@@ -311,7 +337,7 @@ export default {
     }
     const addMarker = (position) => {
       const geometry = new THREE.SphereGeometry( 5, 20, 20 );
-      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+      const material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
       const marker = new THREE.Mesh(geometry, material);
       marker.position.set(position.x, position.y, position.z);
       scene.add(marker);
@@ -338,6 +364,7 @@ export default {
 
     onMounted(() => {
       initThree();
+      getDataViaWebSoket();
       render(); 
       setDots();
       setMarkers();

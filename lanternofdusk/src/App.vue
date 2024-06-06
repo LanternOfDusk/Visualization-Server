@@ -1,10 +1,10 @@
 <template>
   <nav>
-    <router-link to="/">Home</router-link> &nbsp;&nbsp;|&nbsp;&nbsp;
-    <router-link to="/monitor">Monitor</router-link> &nbsp;&nbsp;|&nbsp;&nbsp;
-    <router-link to="/navigation">Navigation</router-link> &nbsp;&nbsp;|&nbsp;&nbsp;
-    <router-link to="/device">Device</router-link> &nbsp;&nbsp;|&nbsp;&nbsp;
-    <router-link to="/about">About</router-link>
+    <router-link to="/">Home</router-link> &nbsp;|&nbsp;
+    <router-link to="/monitor">Monitor</router-link> &nbsp;|&nbsp;
+    <router-link to="/navigation">Navigation</router-link> &nbsp;|&nbsp;
+    <router-link to="/device">Device</router-link> &nbsp;|&nbsp;
+    <router-link to="/marker">Marker</router-link>
   </nav>
   <router-view/>
 </template>
